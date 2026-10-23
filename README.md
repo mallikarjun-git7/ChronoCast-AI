@@ -182,10 +182,10 @@ Compare predictions against observations withheld from training. Record the eval
 
 ### 1. Clone the repository
 
-Replace `YOUR_USERNAME` with your GitHub username.
+
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ChronoCast-AI.git
+git clone https://github.com/mallikarjun-git7/ChronoCast-AI.git
 cd ChronoCast-AI
 ```
 
