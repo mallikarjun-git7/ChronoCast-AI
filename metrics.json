@@ -1,0 +1,14 @@
+{
+  "source": "Saved stdout from the final submitted notebook; not a new training run",
+  "protocol": "One-step prediction using observed validation history",
+  "validation_rows": 166,
+  "lookback": 12,
+  "evaluated_predictions": 154,
+  "metrics": {
+    "MSE": 3.4314,
+    "RMSE": 1.852404,
+    "MAE": 1.513808,
+    "MAPE_percent": 0.790081,
+    "R2": 0.821874
+  }
+}

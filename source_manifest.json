@@ -1,0 +1,27 @@
+[
+  {
+    "notebook": "01_lstm_final.ipynb",
+    "original_sha256": "8766eaab0bb92678cf3c37d1e4004cb925e4bc03deec0d3fd303cfc59ab9126a",
+    "source_code_sha256": "3cd4f8e09d16bfe74ed4d479b33ac89b481965ba8a5f5830cbacb61a014acbdf"
+  },
+  {
+    "notebook": "02_lstm_exploration.ipynb",
+    "original_sha256": "7924ae7c7f08d3d2eda7670ca0092e2725d19b98f44fc76df8058537f557af99",
+    "source_code_sha256": "c2ea3c8c9a240b447550cbd4b5aa4fbfa612b28a4b46f315bf164bdbc9ebc54b"
+  },
+  {
+    "notebook": "03_lstm_keras_baseline.ipynb",
+    "original_sha256": "ec093e1f74d01f3d605cba7b3609ac8c5bb3085c07bad126cdd87ef1dcbf8717",
+    "source_code_sha256": "321fc16f601a1148a701b445da48a8b119ccc58d1c7e2bea8c6d8d6e9c9dd1bd"
+  },
+  {
+    "notebook": "04_prophet_baseline.ipynb",
+    "original_sha256": "f34f5a511ef1a9224c4cdfdd27ca05423f1e47e4cad50d6c6ee56659db72d0f8",
+    "source_code_sha256": "51a896806852d052dd1bb69e8481b4ac330a6f06fab5a2a0a29ec62196e32009"
+  },
+  {
+    "notebook": "05_ensemble_exploration.ipynb",
+    "original_sha256": "08047332251a7affa03ba93edd03cfab7ae7f5351545f697081292dd61d93d01",
+    "source_code_sha256": "9ebb4b27a7226d09d78c364141614b6f0c76caa3fb3deb2f77562ff478e25c97"
+  }
+]

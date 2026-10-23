@@ -1,0 +1,7 @@
+# Use a separate Python 3.10 or 3.11 environment for this historical baseline.
+numpy>=1.26,<2
+pandas>=2.2,<3
+scikit-learn>=1.4,<2
+tensorflow==2.15.1
+jupyterlab>=4,<5
+ipykernel>=6.29,<7
