@@ -1,164 +1,336 @@
-# AI Time Series Forecasting
+# ChronoCast AI
+### Time-Series Forecasting & Predictive Analytics
 
-A course project exploring weekly time series forecasting with a stacked **PyTorch LSTM**, alongside Keras LSTM, Prophet, ARIMA and Transformer experiments.
+**ChronoCast AI** is a machine-learning project focused on analysing historical time-series data, forecasting future observations, and evaluating predictive performance through reproducible experiments.
 
-Developed for **COMP 5511: Artificial Intelligence Concepts** at **The Hong Kong Polytechnic University** in 2025. This repository presents the implementation, selected experiment artifacts and an English guide to the results.
+The project explores the time-series modelling workflow, from data preparation and model training to prediction generation, evaluation, and result analysis. It is designed as a practical exploration of forecasting techniques relevant to data-driven research and AI engineering.
 
-![Archived LSTM training, validation and recursive forecast](assets/lstm_forecast.png)
+> **Project domain:** Time-Series Analysis · Machine Learning · Predictive Analytics · Model Evaluation
 
-*Archived figure from the LSTM exploration notebook. The upper-right panel shows one-step validation predictions; the lower panel shows a recursive forecast without test ground truth.*
+---
 
-## Project at a glance
+## Table of Contents
 
-| Item | Description |
-| --- | --- |
-| Task | Forecast an anonymized weekly indicator |
-| Main implementation | Two-layer LSTM with 128 hidden units and a 64 → 32 → 1 prediction head |
-| Input | Previous 12 standardized target values |
-| Data | 1,325 training rows, 166 validation rows, 162 future timestamps |
-| Training | Adam, MSE loss, learning-rate scheduling and early stopping |
-| Final forecast | Retrain on training + validation data, then predict 162 steps recursively |
-| Other experiments | Keras LSTM, Prophet, ARIMA(5, 1, 2), Transformer and an equal-weight ensemble |
+- [Overview](#overview)
+- [Problem Statement](#problem-statement)
+- [Project Objectives](#project-objectives)
+- [Key Features](#key-features)
+- [Technology Stack](#technology-stack)
+- [Repository Structure](#repository-structure)
+- [Forecasting Workflow](#forecasting-workflow)
+- [Installation](#installation)
+- [Running the Project](#running-the-project)
+- [Model Evaluation](#model-evaluation)
+- [Reproducibility and Data Integrity](#reproducibility-and-data-integrity)
+- [Limitations](#limitations)
+- [Future Enhancements](#future-enhancements)
+- [Learning Outcomes](#learning-outcomes)
+- [License](#license)
 
-Start with [the final LSTM notebook](notebooks/01_lstm_final.ipynb). The [experiment notes](docs/EXPERIMENT_NOTES.md) explain how the saved results relate to the code and historical report.
+## Overview
 
-## Method
+Time-series data appears in many real-world applications, including electricity demand, weather monitoring, financial analysis, traffic forecasting, and industrial sensor systems.
 
-The main notebook loads the chronological training and validation splits, fits a `StandardScaler` on the training targets, and forms sliding windows of 12 observations. Each window predicts the next value.
+ChronoCast AI explores how historical observations can be used to estimate future values while accounting for temporal patterns and changes over time.
+
+The project emphasises three important principles:
+
+1. **Reliable data preparation:** preserve chronological ordering and avoid information leakage.
+2. **Meaningful model comparison:** compare sophisticated models with simple forecasting baselines.
+3. **Measurable performance:** evaluate predictions using appropriate error metrics rather than relying only on visual inspection.
+
+## Problem Statement
+
+Forecasting future observations from historical data is challenging because time-series datasets can contain trends, seasonal patterns, noise, missing values, and abrupt changes.
+
+A model that performs well on historical training data may fail to generalise to future observations.
+
+ChronoCast AI aims to provide a structured workflow for experimenting with forecasting methods, measuring their performance, and understanding the strengths and limitations of the resulting predictions.
+
+## Project Objectives
+
+- Prepare historical data for time-series analysis.
+- Explore forecasting models for sequential observations.
+- Generate predictions for future time steps.
+- Evaluate forecasting errors using standard metrics.
+- Visualise actual and predicted values.
+- Maintain a reproducible workflow for model experiments.
+- Document experimental assumptions, limitations, and findings.
+
+## Key Features
+
+The following capabilities are intended for the project. Update their status according to what has actually been implemented and tested.
+
+| Capability | Purpose |
+|---|---|
+| Data preparation | Clean, transform, and validate time-series observations. |
+| Exploratory analysis | Examine trends, seasonality, and data distributions. |
+| Forecast generation | Predict future values using a selected model. |
+| Baseline comparison | Compare model predictions with simple forecasting methods. |
+| Error evaluation | Calculate MAE, RMSE, and other relevant metrics. |
+| Prediction visualisation | Compare actual observations with forecasts. |
+| Prediction export | Save generated predictions in CSV format, if supported. |
+| Experiment logging | Record training settings and experiment outputs. |
+
+## Technology Stack
+
+The exact stack depends on the packages used in `requirements.txt`.
+
+| Technology | Intended use |
+|---|---|
+| Python | Core implementation and experiment orchestration |
+| Pandas | Data loading and manipulation |
+| NumPy | Numerical computations |
+| Scikit-learn | Preprocessing and evaluation utilities |
+| PyTorch or TensorFlow | Neural-network forecasting, if implemented |
+| Matplotlib | Visualisation of historical data and predictions |
+| Jupyter Notebook | Interactive experimentation, if used |
+
+Only list libraries that are actually used by the source code.
+
+## Repository Structure
 
 ```text
-12 observed target values
-          ↓
-Training-fitted standardization
-          ↓
-Two-layer LSTM · 128 hidden units · dropout 0.2
-          ↓
-Dense 64 → ReLU → dropout → Dense 32 → ReLU → dropout → Dense 1
-          ↓
-Inverse scaling → next target value
+ChronoCast-AI/
+├── run_notebook.py       # Experiment or notebook execution script
+├── training_Log.txt      # Training or experiment logs
+├── submission.csv        # Exported predictions or submission output
+├── README.md             # Project documentation
+└── requirements.txt      # Python dependencies
 ```
 
-Training uses a batch size of 32, an initial learning rate of 0.001, a maximum of 100 epochs and early stopping after 15 epochs without improvement. A separate final model is trained for 50 epochs on all 1,491 observed values. Its predictions are fed back into the input window to produce the future sequence.
+This structure reflects the files currently visible in the repository. Add the dataset, model implementation, notebooks, and test directories when they exist, and update this tree accordingly.
 
-The notebook also computes lag, rolling, difference and cyclical features. **These engineered features are not passed to the final model:** the actual network has `input_size=1` and uses only the target history.
+### File descriptions
 
-## Recorded results
+- **`run_notebook.py`** — inspect this file to identify the entry point and the steps used to execute the experiment.
+- **`training_Log.txt`** — stores training or execution information, depending on the logging implementation.
+- **`submission.csv`** — may contain model predictions or results in a submission-ready format. Document the actual columns and how they are generated.
+- **`requirements.txt`** — lists the Python packages needed to recreate the environment.
 
-The final notebook's saved output reports the following values. They are historical results, not measurements from a new training run during repository preparation.
+## Forecasting Workflow
 
-| Metric | Saved value |
-| --- | ---: |
-| MSE | 3.431400 |
-| RMSE | 1.852404 |
-| MAE | 1.513808 |
-| MAPE | 0.790081% |
-| R² | 0.821874 |
+A reliable forecasting pipeline generally follows these stages.
 
-Source: [saved training log](results/lstm/training_log.txt) and [structured metrics](results/lstm/metrics.json).
+### 1. Data loading and validation
 
-These metrics cover **154 one-step predictions**: the first 12 of the 166 validation rows provide the initial history. Each prediction uses observed validation values from its preceding window. The validation split also selects the checkpoint, so it is not an untouched test set. The **162-step recursive forecast is a different evaluation setting**; its accuracy is not established by this table.
+Load the dataset and identify the timestamp column, target variable, frequency, and any relevant input features.
 
-The earlier multi-model experiment is preserved in [the ensemble results](results/ensemble/model_comparison.csv). It uses different validation horizons for neural models and ARIMA, and its neural-model results differ substantially from the final notebook. It is not presented as a controlled ranking. No verified Kaggle leaderboard score is included.
+Validate missing values, duplicate timestamps, data types, and chronological consistency.
 
-## Run locally
+### 2. Exploratory time-series analysis
 
-### 1. Set up an environment
+Examine historical observations to understand trends, possible seasonality, variability, and outliers.
 
-Use Python 3.10 or 3.11 for the documented setup. The original final notebook records Python 3.10.19; the historical report names PyTorch 2.7.0. The dependency files reconstruct the imported packages rather than reproduce a preserved environment lockfile.
+Visualisations can help identify patterns that influence model selection.
+
+### 3. Preprocessing and feature engineering
+
+Depending on the dataset and forecasting approach, preprocessing may include:
+
+- Handling missing observations.
+- Creating lagged features.
+- Extracting calendar-based features.
+- Scaling numerical inputs.
+- Constructing fixed-length input windows for sequence models.
+
+Fit transformations only on the training portion of the data whenever appropriate.
+
+### 4. Chronological data splitting
+
+Split the dataset by time rather than randomly shuffling observations.
+
+For example:
+
+- Training set: earliest 70% of observations.
+- Validation set: following 15%.
+- Test set: latest 15%.
+
+These proportions are illustrative and should be adapted to the dataset. The final test set should remain untouched during model selection.
+
+### 5. Model training
+
+Train the selected forecasting model using historical observations.
+
+Useful models to explore include:
+
+- Naive forecasting baseline.
+- Moving-average baseline.
+- ARIMA, where appropriate.
+- LSTM neural networks for sequential patterns.
+
+Not every project needs every model. Start with a simple baseline and add complexity only when it provides measurable value.
+
+### 6. Forecast generation
+
+Generate predictions for the required forecasting horizon.
+
+Ensure that the prediction horizon, timestamps, target column, and output format match the task's requirements.
+
+### 7. Evaluation and analysis
+
+Compare predictions against observations withheld from training. Record the evaluation metrics, model configuration, and important limitations.
+
+## Installation
+
+### Prerequisites
+
+- Python version compatible with the project's dependencies.
+- Git.
+- A local copy of the repository.
+- The dataset required by the experiment, if applicable.
+
+### 1. Clone the repository
+
+Replace `YOUR_USERNAME` with your GitHub username.
 
 ```bash
-git clone https://github.com/langezhang/AI-Time-Series-Forecasting.git
-cd AI-Time-Series-Forecasting
-python -m venv .venv
+git clone https://github.com/YOUR_USERNAME/ChronoCast-AI.git
+cd ChronoCast-AI
 ```
 
-Activate the environment:
+### 2. Create a virtual environment
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\Activate.ps1
-```
+**macOS / Linux**
 
 ```bash
-# macOS / Linux
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Then install the main dependencies:
+**Windows**
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+### 3. Install dependencies
 
 ```bash
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-The original notebook runs on CPU. For a CPU-specific PyTorch installation on Windows or Linux, use `python -m pip install torch==2.7.0 --index-url https://download.pytorch.org/whl/cpu` before installing the requirements. See the [official PyTorch version instructions](https://pytorch.org/get-started/previous-versions/).
+## Running the Project
 
-### 2. Provide the data
+The repository currently contains `run_notebook.py`. Inspect the script to confirm its execution requirements and entry point.
 
-Place the course competition files in `data/raw/`:
-
-```text
-data/raw/
-├── train.csv    # Relative Date, Predict Target
-├── val.csv      # Relative Date, Predict Target
-└── test.csv     # Relative Date
-```
-
-The source dataset is not distributed in this public repository. See [data/README.md](data/README.md) for its expected format and access information. Do not substitute the unrelated text file from the original course folder.
-
-Validate the inputs without loading any machine-learning dependencies:
+If it is designed to run directly, execute:
 
 ```bash
-python scripts/run_notebook.py lstm --check-data
+python run_notebook.py
 ```
 
-### 3. Run the final notebook
+If the script expects an external dataset, configuration file, notebook kernel, or command-line arguments, provide those requirements here.
 
-```bash
-python scripts/run_notebook.py lstm
-```
+**Expected output:** the files and results produced by the actual implementation, potentially including experiment logs and a CSV prediction file.
 
-This executes the notebook's Python cells in order and starts the original training procedure. It writes generated files to `outputs/lstm/`:
+Do not describe an output as a forecast or evaluation result until its generation has been verified.
 
-- `best_model.pth`: checkpoint selected on validation loss.
-- `submission2.csv`: 162 forecast rows for the original test file, with `Relative Date` and `Predict Target` columns.
+## Model Evaluation
 
-The final retrained forecasting model is not saved separately by the original code; `best_model.pth` belongs to the validation stage. Training time and numerical results depend on the environment.
+Forecasting models should be evaluated on observations that were not used to train or select the model.
 
-For interactive exploration, run `jupyter lab` from the repository root, open a notebook and run all cells from the top.
+### Mean Absolute Error (MAE)
 
-### Other experiments
+Measures the average absolute difference between predictions and actual values.
 
-| Command | Notebook | Additional setup |
-| --- | --- | --- |
-| `python scripts/run_notebook.py lstm-exploration` | [LSTM exploration](notebooks/02_lstm_exploration.ipynb) | Main requirements |
-| `python scripts/run_notebook.py prophet` | [Prophet baseline](notebooks/04_prophet_baseline.ipynb) | `python -m pip install -r requirements/prophet.txt` |
-| `python scripts/run_notebook.py ensemble` | [Multi-model experiment](notebooks/05_ensemble_exploration.ipynb) | `python -m pip install -r requirements/ensemble.txt` |
-| `python scripts/run_notebook.py keras` | [Keras baseline](notebooks/03_lstm_keras_baseline.ipynb) | Separate Python 3.10/3.11 environment with `requirements/keras.txt` |
+\[
+MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i-\hat{y}_i|
+\]
 
-Each experiment writes into its own `outputs/<experiment>/` directory. These files are ignored by Git. The exploratory notebooks preserve their original modeling behavior and are not guaranteed to reproduce the final LSTM's results.
+Lower values indicate smaller average absolute errors.
 
-## Repository layout
+### Root Mean Squared Error (RMSE)
 
-```text
-AI-Time-Series-Forecasting/
-├── notebooks/                 # Five curated course notebooks
-├── scripts/run_notebook.py    # Notebook runner and input checks
-├── data/README.md             # Input schema and access notes
-├── assets/lstm_forecast.png   # Selected historical visualization
-├── results/                  # Saved logs, metrics and selected forecasts
-├── docs/
-│   ├── EXPERIMENT_NOTES.md    # Evidence, limitations and artifact provenance
-│   ├── course_report.pdf     # Archived report body, identifying cover removed
-│   └── source_manifest.json  # Hashes of source notebooks
-├── requirements/             # Dependencies for optional experiments
-└── requirements.txt          # Main LSTM dependencies
-```
+Penalises larger prediction errors more strongly.
 
-## Scope and limitations
+\[
+RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}
+\]
 
-This is a coursework portfolio, with the original model logic preserved. Repository preparation standardizes paths, separates generated outputs, clears notebook execution output and documents the available evidence. It does not introduce a new model or rerun the experiments.
+Lower values indicate smaller root mean squared error.
 
-The [archived report](docs/course_report.pdf) contains historical claims that do not all match the submitted code or available logs, including its engineered-feature interpretation and baseline comparisons. Read it alongside [the implementation notes](docs/EXPERIMENT_NOTES.md). Long-horizon backtesting, a consistent cross-model evaluation protocol and a fully locked training environment remain future work.
+### Evaluation procedure
 
-Original classroom handouts, duplicate report drafts, student identifiers, local model binaries and unrelated materials are excluded from the public repository. No open-source license is declared in this archive.
+1. Establish a simple baseline.
+2. Train the candidate forecasting model using training data.
+3. Select model settings using validation data.
+4. Generate predictions for the held-out test period.
+5. Calculate MAE and RMSE.
+6. Plot actual and predicted values.
+7. Record results alongside model settings and dataset details.
+
+No performance numbers are reported here because the dataset, implementation, and measured results have not yet been verified.
+
+## Reproducibility and Data Integrity
+
+To make experiments repeatable and trustworthy:
+
+- Record the dataset source and relevant preprocessing decisions.
+- Fix random seeds where applicable.
+- Record model parameters and dependency versions.
+- Preserve chronological ordering during splitting and evaluation.
+- Avoid using future information to construct training features.
+- Keep test data separate from model-selection decisions.
+- Document the meaning and schema of exported CSV files.
+- Exclude credentials, private datasets, and unnecessary generated artifacts from version control.
+
+## Limitations
+
+Forecasting performance depends on data quality, dataset size, temporal structure, and the selected forecasting horizon.
+
+Potential limitations include:
+
+- Unexpected changes in underlying patterns.
+- Missing or noisy observations.
+- Limited training data.
+- Poor generalisation to future periods.
+- Model sensitivity to preprocessing and hyperparameters.
+- Evaluation results that do not represent real-world performance.
+
+A forecasting model should be treated as a decision-support tool rather than a guarantee of future outcomes.
+
+## Future Enhancements
+
+Potential extensions include:
+
+- Compare ARIMA, statistical baselines, and LSTM models.
+- Add automated hyperparameter experiments.
+- Build a dashboard for interactive forecasting.
+- Support multiple time-series datasets.
+- Add rolling-window or walk-forward evaluation.
+- Visualise prediction intervals and uncertainty.
+- Track experiments and model configurations.
+- Add unit tests and continuous integration.
+- Package the application for reproducible deployment.
+
+These are planned enhancements, not claims about current functionality.
+
+## Learning Outcomes
+
+This project provides an opportunity to develop practical skills in:
+
+- Time-series analysis and forecasting.
+- Data preprocessing and feature engineering.
+- Statistical and machine-learning model comparison.
+- Chronological validation and data-leakage prevention.
+- Forecast error measurement and interpretation.
+- Python experimentation and result visualisation.
+- Reproducible research and software engineering.
+
+## License
+
+Choose a license that reflects how you want others to use your code. If you select MIT, add a corresponding `LICENSE` file. Without a license, others generally do not receive permission to reuse your code simply because the repository is public.
+
+---
+
+### Project Information
+
+**Project:** ChronoCast AI  
+**Domain:** Time-Series Forecasting and Predictive Analytics  
+**Language:** Python  
+**Primary goal:** Explore forecasting techniques through reproducible experiments and measurable evaluation.
+
+Built as a learning project to explore practical machine-learning workflows for sequential data.
